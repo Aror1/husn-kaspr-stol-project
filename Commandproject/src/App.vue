@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import type { CartItem, Product, Category } from './components/types';
 import AppHeader from './components/AppHeader.vue';
 import HeroSection from './components/HeroSection.vue';
@@ -8,16 +8,19 @@ import FilterTabs from './components/FilterTabs.vue';
 import ProductGrid from './components/ProductGrid.vue';
 import CartModal from './components/CartModal.vue';
 import AppFooter from './components/AppFooter.vue';
+import ContactModal from './components/ContactModal.vue';
+import CheckoutPage from './components/CheckoutPage.vue';
 
 // Cart state
 const cartOpen = ref(false);
 const cartItems = ref<CartItem[]>([
-  { id: 1, name: 'Маргарита Малката • Сметанова пур', price: 649, quantity: 1 },
-  { id: 2, name: 'Маргарита Малката • Сметанова пур', price: 649, quantity: 1 }
 ]);
+const contactOpen = ref(false);
+const activeCategory = ref('напитки');
+const activeMainCategory = ref('Завтраки');
+const activeSubCategory = ref('напитки');
 
-// Active category
-const activeCategory = ref('напитков');
+
 
 // Products data
 const lemonades: Product[] = [
@@ -44,6 +47,41 @@ const categories: Category[] = [
   { name: 'Закуски', icon: '🍤', label: 'Закуски' },
   { name: 'Десерты', icon: '🍰', label: 'Десерты' }
 ];
+
+const categoryProducts: Record<string, Product[]> = {
+  'напитков': lemonades,
+  'от кофе': pizzas,
+  'сладкого': [], // заглушка
+};
+
+const categoryData: Record<string, Record<string, Product[]>> = {
+  'Завтраки': {
+    'напитки': lemonades,
+    'к кофе': pizzas,
+    'сладкое': [],
+  },
+  'Комплексы': {
+    'напитки': lemonades,
+    'к кофе': pizzas,
+    'сладкое': [],
+  },
+  'Закуски': {
+    'напитки': [],
+    'к кофе': pizzas,
+    'сладкое': [],
+  },
+  'Десерты': {
+    'напитки': lemonades,
+    'к кофе': [],
+    'сладкое': lemonades,
+  }
+};
+
+
+
+const currentProducts = computed(() => {
+  return categoryData[activeMainCategory.value]?.[activeSubCategory.value] || [];
+});
 
 const addToCart = (product: Product) => {
   const existingItem = cartItems.value.find(item => item.id === product.id);
@@ -80,44 +118,32 @@ const addItemToCart = (id: number) => {
 const cartCount = () => {
   return cartItems.value.reduce((sum, item) => sum + item.quantity, 0);
 };
+
+const handleCategorySelect = (categoryName: string) => {
+  const mapping: Record<string, string> = {
+    'Завтраки': 'напитков',
+    'Комплексы': 'от кофе',
+    'Закуски': 'сладкого',
+    'Десерты': 'сладкого',
+  };
+  activeCategory.value = mapping[categoryName] || 'напитки';
+};
 </script>
 
 <template>
   <div class="min-h-screen bg-white">
-    <AppHeader
-      :cart-count="cartCount()"
-      @open-cart="cartOpen = true"
-    />
+    <AppHeader :cart-count="cartCount()" @open-cart="cartOpen = true" />
 
     <HeroSection />
 
-    <CategoryPills :categories="categories" />
+    <CategoryPills :categories="categories" @select-category="activeMainCategory = $event" />
+    <FilterTabs :active-category="activeSubCategory" @update-category="activeSubCategory = $event" />
+    <ProductGrid :title="activeSubCategory" :products="currentProducts" @add-to-cart="addToCart" />
 
-    <FilterTabs
-      :active-category="activeCategory"
-      @update-category="activeCategory = $event"
-    />
+    <AppFooter @open-contact="contactOpen = true" />
+    <ContactModal :is-open="contactOpen" @close="contactOpen = false" />
 
-    <ProductGrid
-      title="Лимонады"
-      :products="lemonades"
-      @add-to-cart="addToCart"
-    />
-
-    <ProductGrid
-      title="От кофе"
-      :products="pizzas"
-      @add-to-cart="addToCart"
-    />
-
-    <AppFooter />
-
-    <CartModal
-      :is-open="cartOpen"
-      :items="cartItems"
-      @close="cartOpen = false"
-      @add-item="addItemToCart"
-      @remove-item="removeFromCart"
-    />
+    <CartModal :is-open="cartOpen" :items="cartItems" @close="cartOpen = false" @add-item="addItemToCart"
+      @remove-item="removeFromCart" />
   </div>
 </template>
