@@ -9,29 +9,70 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section class="container mx-auto px-4 py-4">
-    <div class="flex gap-6 border-b border-gray-200">
+  <section class="filter-tabs-section">
+    <div class="filter-tabs-container">
       <button
-        :class="['pb-3 px-2 font-medium transition-colors',
-                 activeCategory === 'напитков' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-700']"
-        @click="emit('updateCategory', 'напитков')"
+        class="filter-tab"
+        :class="{ 'filter-tab--active': activeCategory === 'напитки' }"
+        @click="emit('updateCategory', 'напитки')"
       >
-        напитков
+        напитки
       </button>
       <button
-        :class="['pb-3 px-2 font-medium transition-colors',
-                 activeCategory === 'от кофе' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-700']"
-        @click="emit('updateCategory', 'от кофе')"
+        class="filter-tab"
+        :class="{ 'filter-tab--active': activeCategory === 'к кофе' }"
+        @click="emit('updateCategory', 'к кофе')"
       >
-        от кофе
+        к кофе
       </button>
       <button
-        :class="['pb-3 px-2 font-medium transition-colors',
-                 activeCategory === 'сладкого' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-700']"
-        @click="emit('updateCategory', 'сладкого')"
+        class="filter-tab"
+        :class="{ 'filter-tab--active': activeCategory === 'сладкое' }"
+        @click="emit('updateCategory', 'сладкое')"
       >
-        сладкого
+        сладкое
       </button>
     </div>
   </section>
 </template>
+
+<style scoped>
+.filter-tabs-section {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.filter-tabs-container {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+
+.filter-tab {
+  padding: 10px 5px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #6b7280;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.filter-tab:hover {
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.filter-tab--active {
+  color: #111827;
+  border-color: #111827;
+  border-radius: 20px;
+}
+</style>
